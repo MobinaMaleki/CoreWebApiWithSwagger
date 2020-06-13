@@ -34,7 +34,7 @@ namespace CoreWebApi.Services
             
         }
 
-        public async Task <Post > GetPostByIdAsync(Guid postId)
+        public async Task <Post> GetPostByIdAsync(Guid postId)
         {
             return await dbContext.Posts.SingleOrDefaultAsync(x => x.Id == postId);
         }

@@ -23,6 +23,30 @@ namespace CoreWebApi.Services
             _userManager = userManager;
             _jwtSettings = jwtSettings;
         }
+
+        public async Task<AuthenticationResult> LoginAsync(string email, string password)
+        {
+            var existinguser = await _userManager.FindByEmailAsync(email);
+
+            if (existinguser == null)
+            {
+                return new AuthenticationResult() { Errors = new[] { "this user does not exist" } };
+            }
+           
+
+            var UserHasValidPassword = await _userManager.CheckPasswordAsync(existinguser, password);
+
+            if (!UserHasValidPassword)
+            {
+                return new AuthenticationResult() { Errors = new[] { "password is wrong" } };
+
+
+            }
+
+            return GenerateAuthenticationResultForUser(existinguser);
+
+        }
+
         public async Task<AuthenticationResult> RegisterAsync(string email, string password)
         {
             var existinguser = await _userManager.FindByEmailAsync(email);
@@ -48,6 +72,12 @@ namespace CoreWebApi.Services
               
             }
 
+            return GenerateAuthenticationResultForUser(newuser);
+
+
+        }
+        private AuthenticationResult GenerateAuthenticationResultForUser(IdentityUser newuser)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSettings.Secret);
 
@@ -61,7 +91,7 @@ namespace CoreWebApi.Services
                     new Claim(type: "id", value: newuser.Id),
                 }),
                 Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials=new SigningCredentials(new SymmetricSecurityKey(key),SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
 
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
@@ -71,5 +101,6 @@ namespace CoreWebApi.Services
                 Token = tokenHandler.WriteToken(token)
             };
         }
+          
     }
 }

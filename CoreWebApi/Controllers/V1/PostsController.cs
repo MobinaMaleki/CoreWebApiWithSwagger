@@ -1,4 +1,4 @@
-﻿using System;
+﻿ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -65,15 +65,16 @@ namespace CoreWebApi.Controllers
         }
 
         [HttpGet(ApiRoutes.posts.Get)]
-        public IActionResult Get([FromRoute]Guid postId)
+        public async Task<IActionResult> Get([FromRoute]Guid postId)
         {
-            var post = _postservise.GetPostByIdAsync(postId);
+            Post post = await _postservise.GetPostByIdAsync(postId);
             if (post==null)
             {
                 return NotFound();
             }
             return Ok(post);
         }
+
         [HttpPost(ApiRoutes.posts.Create)]
         public async Task<IActionResult> Create([FromBody]CreatePostRequest postRequest)
         {
