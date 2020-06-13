@@ -8,14 +8,18 @@ using CoreWebApi.Contacts.V1.Requests;
 using CoreWebApi.Contacts.V1.Responses;
 using CoreWebApi.Domain;
 using CoreWebApi.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 
 namespace CoreWebApi.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class PostsController : Controller
     {
         private readonly IPostServise _postservise;
+
         public PostsController(IPostServise postServise)
         {
             _postservise = postServise;
@@ -46,7 +50,7 @@ namespace CoreWebApi.Controllers
             
            
         }
-        [HttpDelete(ApiRoutes.posts.Delete)]
+        [HttpDelete(ApiRoutes.posts.Delete)]        
         public async Task<IActionResult> Delete([FromRoute]Guid postId)
         {
             var deleted =await _postservise.DeletePostAsync(postId);
@@ -80,7 +84,7 @@ namespace CoreWebApi.Controllers
             var baseUrl = $"{ HttpContext.Request.Scheme}://{HttpContext.Request.Host.ToUriComponent()}";
             var locationUrl = baseUrl + "/" + ApiRoutes.posts.Get.Replace("{postId}",post.Id.ToString());
             var response = new PostResponse() { Id = post.Id };
-            return Created(locationUrl,post);
+            return Created(locationUrl, response);
         }
     }
 }
